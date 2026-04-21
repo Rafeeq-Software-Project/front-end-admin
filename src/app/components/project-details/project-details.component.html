@@ -1,46 +1,124 @@
-<div class="details-overlay" (click)="onClose()">
-  <div class="details-card" (click)="$event.stopPropagation()">
-    <div class="details-header">
-      <div class="title-section">
-        <div class="badge" [ngClass]="project.status.toLowerCase()">{{ project.status }}</div>
-        <h2>{{ project.title }}</h2>
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-info">
+        <span class="badge" [ngClass]="item.status.toLowerCase()">{{ item.status }}</span>
+        <h2 class="title">{{ item.name }}</h2>
       </div>
       <button class="close-btn" (click)="onClose()">
         <i class="fas fa-times"></i>
       </button>
     </div>
 
-    <div class="details-content">
-      <div class="meta-grid">
-        <div class="meta-item">
-          <span class="label">Date Submitted</span>
-          <span class="value">{{ project.createdAt | date:'longDate' }}</span>
+    <div class="modal-body">
+      <!-- Comparison View for Drafts -->
+      <div *ngIf="draft" class="comparison-container">
+        <!-- Draft Version -->
+        <div class="comparison-column draft-column">
+          <div class="column-header">
+            <i class="fas fa-file-signature"></i>
+            <h3>Draft Version</h3>
+          </div>
+          <div class="details-list">
+            <div class="detail-item">
+              <label>Name</label>
+              <p [class.changed]="draft.name !== project.name">{{ draft.name }}</p>
+            </div>
+            <div class="detail-item">
+              <label>Description</label>
+              <p [class.changed]="draft.description !== project.description">{{ draft.description }}</p>
+            </div>
+            <div class="detail-item">
+              <label>Category</label>
+              <p [class.changed]="draft.category !== project.category">{{ draft.category }}</p>
+            </div>
+            <div class="detail-item">
+              <label>Funding Goal</label>
+              <p [class.changed]="draft.fundingGoal !== project.fundingGoal">{{ draft.fundingGoal | currency }}</p>
+            </div>
+          </div>
         </div>
-        <div class="meta-item">
-          <span class="label">Creator</span>
-          <span class="value">{{ project.creatorName }}</span>
-        </div>
-        <div class="meta-item">
-          <span class="label">Project ID</span>
-          <span class="value">#{{ project.id }}</span>
+
+        <!-- Live Version -->
+        <div class="comparison-column live-column">
+          <div class="column-header">
+            <i class="fas fa-broadcast-tower"></i>
+            <h3>Live Project</h3>
+          </div>
+          <div class="details-list">
+            <div class="detail-item">
+              <label>Name</label>
+              <p>{{ project.name }}</p>
+            </div>
+            <div class="detail-item">
+              <label>Description</label>
+              <p>{{ project.description }}</p>
+            </div>
+            <div class="detail-item">
+              <label>Category</label>
+              <p>{{ project.category }}</p>
+            </div>
+            <div class="detail-item">
+              <label>Funding Goal</label>
+              <p>{{ project.fundingGoal | currency }}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="description-section">
-        <h3>Project Description</h3>
-        <p>{{ project.description }}</p>
-      </div>
+      <!-- Single View for Pending Projects -->
+      <div *ngIf="!draft" class="single-details">
+        <div class="details-grid">
+          <div class="detail-main">
+            <section>
+              <h4>Description</h4>
+              <p>{{ project.description }}</p>
+            </section>
 
-      <!-- Add more sections if needed -->
+            <section>
+              <h4>Use of Funds</h4>
+              <p>{{ project.useOfFunds }}</p>
+            </section>
+          </div>
+
+          <aside class="detail-sidebar">
+            <div class="info-card">
+              <div class="info-item">
+                <label><i class="fas fa-tag"></i> Category</label>
+                <span>{{ project.category }}</span>
+              </div>
+              <div class="info-item">
+                <label><i class="fas fa-coins"></i> Funding Goal</label>
+                <span class="highlight">{{ project.fundingGoal | currency }}</span>
+              </div>
+              <div class="info-item">
+                <label><i class="fas fa-calendar"></i> Timeline</label>
+                <span>{{ project.startDate | date }} - {{ project.endDate | date }}</span>
+              </div>
+            </div>
+
+            <div class="founder-card">
+              <h4>Founder</h4>
+              <div class="founder-info">
+                <img [src]="project.founderProfilePicture" alt="Profile">
+                <div>
+                  <span class="name">{{ project.founderName }}</span>
+                  <span class="company">{{ project.founderCompany }}</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
     </div>
 
-    <div class="details-footer">
+    <div class="modal-footer">
       <button class="btn btn-secondary" (click)="onClose()">Cancel</button>
-      <div class="action-btns">
+      <div class="action-buttons">
         <button class="btn btn-danger" (click)="onReject()">
           <i class="fas fa-times-circle"></i> Reject
         </button>
-        <button class="btn btn-primary" (click)="onApprove()">
+        <button class="btn btn-success" (click)="onApprove()">
           <i class="fas fa-check-circle"></i> Approve
         </button>
       </div>

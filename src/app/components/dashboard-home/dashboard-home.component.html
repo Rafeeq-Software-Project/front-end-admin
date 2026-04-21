@@ -1,82 +1,118 @@
 <div class="dashboard-home">
-  <!-- Status Cards -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon pending">
-        <i class="fas fa-clock"></i>
-      </div>
-      <div class="stat-info">
-        <span class="label">Pending Approval</span>
+  <!-- Dynamic Page Title & Stats -->
+  <header class="section-header animate-fade-in">
+    <div class="title-group">
+      <h1 class="page-title">
+        <span *ngIf="currentView() === 'overview'">Dashboard Overview</span>
+        <span *ngIf="currentView() === 'pending'">Pending Projects</span>
+        <span *ngIf="currentView() === 'drafts'">Draft Projects</span>
+      </h1>
+      <p class="subtitle">Welcome back, Admin. Here's what needs your attention.</p>
+    </div>
+
+    <!-- Stats summary for the selected view -->
+    <div class="stats-mini-grid">
+      <div class="mini-stat" [class.active]="currentView() === 'pending'" (click)="dashboardService.setView('pending')">
+        <span class="label">Pending</span>
         <span class="value">{{ pendingProjects().length }}</span>
       </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon draft">
-        <i class="fas fa-edit"></i>
-      </div>
-      <div class="stat-info">
-        <span class="label">Draft Projects</span>
+      <div class="mini-stat" [class.active]="currentView() === 'drafts'" (click)="dashboardService.setView('drafts')">
+        <span class="label">Drafts</span>
         <span class="value">{{ draftProjects().length }}</span>
       </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon approved">
-        <i class="fas fa-check-circle"></i>
-      </div>
-      <div class="stat-info">
-        <span class="label">Total Approved Today</span>
-        <span class="value">12</span>
-      </div>
+  </header>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-state">
+    <div class="spinner-container">
+      <div class="spinner"></div>
+    </div>
+    <div class="loading-text">
+      <h3>Fetching Data</h3>
+      <p>Please wait while we sync with the server...</p>
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading()" class="loading-container">
-    <div class="spinner"></div>
-    <p>Loading projects...</p>
-  </div>
+  <!-- Content Areas -->
+  <div *ngIf="!isLoading()" class="view-container">
 
-  <!-- Content -->
-  <div *ngIf="!isLoading()" class="dashboard-sections">
-    <!-- New Projects Section -->
-    <section class="project-section">
-      <div class="section-header">
-        <h3>New Projects <span class="count">{{ pendingProjects().length }}</span></h3>
+    <!-- Overview View (Default) -->
+    <div *ngIf="currentView() === 'overview'" class="overview-grid animate-slide-up">
+      <div class="welcome-card">
+        <div class="card-content">
+          <h2>Quick Actions</h2>
+          <div class="action-buttons">
+            <button class="action-btn" (click)="dashboardService.setView('pending')">
+              <i class="fas fa-clock"></i> Review Projects
+            </button>
+            <button class="action-btn secondary" (click)="dashboardService.setView('drafts')">
+              <i class="fas fa-file-edit"></i> Check Drafts
+            </button>
+          </div>
+        </div>
+        <img src="assets/dashboard-illustration.svg" alt="" class="illustration" onerror="this.style.display='none'">
       </div>
 
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="icon-box blue">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <div>
+            <span class="num">{{ pendingProjects().length }}</span>
+            <span class="txt">Projects waiting for review</span>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="icon-box purple">
+             <i class="fas fa-file-alt"></i>
+          </div>
+          <div>
+            <span class="num">{{ draftProjects().length }}</span>
+            <span class="txt">New drafts to compare</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Projects View -->
+    <section *ngIf="currentView() === 'pending'" class="projects-section animate-slide-up">
       <div *ngIf="pendingProjects().length === 0" class="empty-state">
-        <i class="fas fa-folder-open"></i>
-        <p>No projects pending approval.</p>
+        <div class="empty-icon">
+          <i class="fas fa-folder-open"></i>
+        </div>
+        <h3>Everything is up to date!</h3>
+        <p>No projects are currently awaiting your approval.</p>
       </div>
 
       <div class="projects-grid">
         <app-project-card *ngFor="let project of pendingProjects()" [project]="project"
-          (viewDetails)="onViewProject($event)">
+          (viewDetails)="onViewDetail($event)">
         </app-project-card>
       </div>
     </section>
 
-    <!-- Draft Projects Section -->
-    <section class="project-section">
-      <div class="section-header">
-        <h3>Draft Projects <span class="count">{{ draftProjects().length }}</span></h3>
-      </div>
-
+    <!-- Draft Projects View -->
+    <section *ngIf="currentView() === 'drafts'" class="projects-section animate-slide-up">
       <div *ngIf="draftProjects().length === 0" class="empty-state">
-        <i class="fas fa-edit"></i>
-        <p>No draft projects at the moment.</p>
+        <div class="empty-icon">
+          <i class="fas fa-edit"></i>
+        </div>
+        <h3>No drafts found</h3>
+        <p>There are no draft submissions for live projects at this time.</p>
       </div>
 
       <div class="projects-grid">
-        <app-project-card *ngFor="let project of draftProjects()" [project]="project"
-          (viewDetails)="onViewProject($event)">
+        <app-project-card *ngFor="let draft of draftProjects()" [project]="draft" (viewDetails)="onViewDetail($event)">
         </app-project-card>
       </div>
     </section>
   </div>
 
-  <!-- Project Details Modal -->
-  <app-project-details *ngIf="selectedProject()" [project]="selectedProject()!" (close)="onCloseDetails()"
-    (approve)="onApproveProject($event)" (reject)="onRejectProject($event)">
+  <!-- Detailed View Modal -->
+  <app-project-details *ngIf="selectedItem()" [item]="selectedItem()!" (close)="onCloseDetails()"
+    (approve)="isProject(selectedItem()!) ? onApproveProject($event) : onApproveDraft($event)"
+    (reject)="isProject(selectedItem()!) ? onRejectProject($event) : onRejectDraft($event)">
   </app-project-details>
 </div>

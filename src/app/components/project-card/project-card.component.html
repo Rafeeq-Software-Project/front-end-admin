@@ -1,19 +1,31 @@
-<div class="project-card" (click)="onView()">
+<div class="project-card" (click)="onView()" [class.draft-card]="isDraft(project)">
   <div class="card-header">
-    <div class="badge" [ngClass]="project.status.toLowerCase()">{{ project.status }}</div>
-    <span class="date">{{ project.createdAt | date:'shortDate' }}</span>
+    <div class="badges">
+      <div class="badge" [ngClass]="project.status.toLowerCase()">{{ project.status }}</div>
+      <div *ngIf="isDraft(project)" class="badge draft-indicator">Draft</div>
+    </div>
+    <span class="date">{{ displayDate | date:'mediumDate' }}</span>
   </div>
 
-  <h3 class="title">{{ project.title }}</h3>
-  <p class="description">{{ project.description | slice:0:100 }}{{ project.description.length > 100 ? '...' : '' }}</p>
+  <h3 class="title">{{ project.name }}</h3>
+  <p class="description">{{ project.description | slice:0:120 }}{{ project.description.length > 120 ? '...' : '' }}</p>
 
   <div class="card-footer">
-    <div class="creator">
-      <i class="fas fa-user-circle"></i>
-      <span>{{ project.creatorName }}</span>
+    <div class="founder">
+      <div class="founder-info">
+        <i class="fas fa-user-tie"></i>
+        <span>{{ project.founderName }}</span>
+      </div>
+      <span class="company" *ngIf="project.founderCompany">{{ project.founderCompany }}</span>
     </div>
-    <button class="view-btn">
-      Details <i class="fas fa-chevron-right"></i>
-    </button>
+    <div class="funding-goal">
+      <span class="label">Goal:</span>
+      <span class="value">{{ project.fundingGoal | currency }}</span>
+    </div>
+  </div>
+  
+  <div class="card-action">
+    <span>View Details</span>
+    <i class="fas fa-arrow-right"></i>
   </div>
 </div>

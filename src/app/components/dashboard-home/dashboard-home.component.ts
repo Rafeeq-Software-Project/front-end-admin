@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProjectService, Project } from '../../services/project.service';
+import { ProjectService, Project, DraftProject } from '../../services/project.service';
+import { DashboardService, DashboardView } from '../../services/dashboard.service';
 import { ProjectCardComponent } from '../project-card/project-card.component';
 import { ProjectDetailsComponent } from '../project-details/project-details.component';
-import { forkJoin, catchError, of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-home',
@@ -13,84 +14,176 @@ import { forkJoin, catchError, of } from 'rxjs';
   styleUrls: ['./dashboard-home.component.scss']
 })
 export class DashboardHomeComponent implements OnInit {
-  projectService = inject(ProjectService);
+  public dashboardService = inject(DashboardService);
+  private projectService = inject(ProjectService);
 
+  currentView = this.dashboardService.currentView;
   pendingProjects = signal<Project[]>([]);
-  draftProjects = signal<Project[]>([]);
+  draftProjects = signal<DraftProject[]>([]);
 
-  isLoading = signal(true);
-  selectedProject = signal<Project | null>(null);
+  isLoading = signal(false);
+  selectedItem = signal<Project | DraftProject | null>(null);
 
-  ngOnInit() {
-    this.loadProjects();
+  constructor() {
+    // React to view changes and load data
+    effect(() => {
+      const view = this.currentView();
+      if (view === 'pending') {
+        this.loadPendingProjects();
+      } else if (view === 'drafts') {
+        this.loadDraftProjects();
+      }
+    }, { allowSignalWrites: true });
   }
 
-  loadProjects() {
-    this.isLoading.set(true);
+  ngOnInit() {
+    // Initial load for overview stats
+    this.loadPendingProjects();
+    this.loadDraftProjects();
+  }
 
-    // Using forkJoin to load both lists. In a real app, I'd handle them independently if needed.
-    // Providing mock data if API fails since I don't know the exact endpoints yet.
-    forkJoin({
-      pending: this.projectService.getPendingProjects().pipe(catchError(() => of(this.getMockPending()))),
-      draft: this.projectService.getDraftProjects().pipe(catchError(() => of(this.getMockDraft())))
-    }).subscribe({
+  loadPendingProjects() {
+    this.isLoading.set(this.currentView() === 'pending');
+    this.projectService.getPendingProjects().pipe(
+      catchError(() => {
+        console.warn('Using mock data for Pending Projects');
+        return of(this.getMockPending());
+      })
+    ).subscribe({
       next: (res) => {
-        this.pendingProjects.set(res.pending);
-        this.draftProjects.set(res.draft);
+        this.pendingProjects.set(res);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)
     });
   }
 
-  onViewProject(project: Project) {
-    this.selectedProject.set(project);
+  loadDraftProjects() {
+    this.isLoading.set(this.currentView() === 'drafts');
+    this.projectService.getDraftProjects().pipe(
+      catchError(() => {
+        console.warn('Using mock data for Draft Projects');
+        return of(this.getMockDrafts());
+      })
+    ).subscribe({
+      next: (res) => {
+        this.draftProjects.set(res);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
+  }
+
+  onViewDetail(item: Project | DraftProject) {
+    this.selectedItem.set(item);
   }
 
   onCloseDetails() {
-    this.selectedProject.set(null);
+    this.selectedItem.set(null);
   }
 
   onApproveProject(id: number) {
     this.projectService.approveProject(id).subscribe({
       next: () => {
-        this.loadProjects();
+        this.loadPendingProjects();
         this.onCloseDetails();
       },
-      error: () => {
-        // Fallback for demo
-        this.pendingProjects.update(projects => projects.filter(p => p.id !== id));
-        this.onCloseDetails();
-      }
+      error: () => this.onCloseDetails() // In a real app, show error toast
     });
   }
 
   onRejectProject(id: number) {
     this.projectService.rejectProject(id).subscribe({
       next: () => {
-        this.loadProjects();
+        this.loadPendingProjects();
         this.onCloseDetails();
       },
-      error: () => {
-        // Fallback for demo
-        this.pendingProjects.update(projects => projects.filter(p => p.id !== id));
-        this.onCloseDetails();
-      }
+      error: () => this.onCloseDetails()
     });
+  }
+
+  onApproveDraft(id: number) {
+    this.projectService.approveDraft(id).subscribe({
+      next: () => {
+        this.loadDraftProjects();
+        this.onCloseDetails();
+      },
+      error: () => this.onCloseDetails()
+    });
+  }
+
+  onRejectDraft(id: number) {
+    this.projectService.rejectDraft(id).subscribe({
+      next: () => {
+        this.loadDraftProjects();
+        this.onCloseDetails();
+      },
+      error: () => this.onCloseDetails()
+    });
+  }
+
+  // Type guard to check if item is a Project (not a Draft)
+  isProject(item: Project | DraftProject): item is Project {
+    return (item as any).liveProject === undefined;
+  }
+
+  // Type guard to check if item is a Draft
+  isDraft(item: Project | DraftProject): item is DraftProject {
+    return (item as any).liveProject !== undefined;
   }
 
   private getMockPending(): Project[] {
     return [
-      { id: 101, title: 'Solar Energy initiative', description: 'A project to install solar panels in rural schools to provide sustainable energy.', status: 'Pending', createdAt: new Date().toISOString(), creatorName: 'Ahmed Ali' },
-      { id: 102, title: 'Clean Water for All', description: 'Building low-cost filtration systems for communities without access to potable water.', status: 'Pending', createdAt: new Date().toISOString(), creatorName: 'Sara Smith' },
-      { id: 103, title: 'Digital Literacy Program', description: 'Providing refurbished laptops and training to underprivileged youth.', status: 'Pending', createdAt: new Date().toISOString(), creatorName: 'John Doe' }
+      {
+        id: 1,
+        founderId: 101,
+        name: 'Eco-Friendly Housing',
+        description: 'Building sustainable homes with recycled materials.',
+        category: 'Construction',
+        status: 'Pending',
+        fundingGoal: 500000,
+        useOfFunds: 'Material procurement and land acquisition',
+        startDate: '2024-06-01',
+        endDate: '2024-12-01',
+        createdAt: new Date().toISOString(),
+        founderName: 'Ahmed Mansour',
+        founderCompany: 'GreenFuture Ltd',
+        founderProfilePicture: 'https://ui-avatars.com/api/?name=Ahmed+Mansour'
+      }
     ];
   }
 
-  private getMockDraft(): Project[] {
+  private getMockDrafts(): DraftProject[] {
     return [
-      { id: 201, title: 'Urban Gardening', description: 'Converting abandoned lots into community gardens. Needs more details on maintenance plan.', status: 'Draft', createdAt: new Date().toISOString(), creatorName: 'Elena G.' },
-      { id: 202, title: 'Waste Management System', description: 'A local recycling initiative. Budget details are missing.', status: 'Draft', createdAt: new Date().toISOString(), creatorName: 'Mike Ross' }
+      {
+        id: 1,
+        projectId: 10,
+        founderId: 102,
+        name: 'Updated Smart Agriculture',
+        description: 'New AI features for irrigation management.',
+        category: 'AgriTech',
+        fundingGoal: 250000,
+        status: 'Draft',
+        founderName: 'Sara Kamel',
+        founderCompany: 'AgriSmart',
+        liveProject: {
+          id: 10,
+          founderId: 102,
+          name: 'Smart Agriculture',
+          description: 'Basic automated irrigation system.',
+          category: 'AgriTech',
+          status: 'Approved',
+          fundingGoal: 150000,
+          useOfFunds: 'Hardware development',
+          startDate: '2023-01-01',
+          endDate: '2023-08-01',
+          createdAt: '2022-12-01T10:00:00Z',
+          founderName: 'Sara Kamel',
+          founderCompany: 'AgriSmart',
+          founderProfilePicture: 'https://ui-avatars.com/api/?name=Sara+Kamel'
+        }
+      }
     ];
   }
 }
+
