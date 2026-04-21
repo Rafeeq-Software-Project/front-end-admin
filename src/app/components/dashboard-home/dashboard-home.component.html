@@ -1,0 +1,82 @@
+<div class="dashboard-home">
+  <!-- Status Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon pending">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="stat-info">
+        <span class="label">Pending Approval</span>
+        <span class="value">{{ pendingProjects().length }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon draft">
+        <i class="fas fa-edit"></i>
+      </div>
+      <div class="stat-info">
+        <span class="label">Draft Projects</span>
+        <span class="value">{{ draftProjects().length }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon approved">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-info">
+        <span class="label">Total Approved Today</span>
+        <span class="value">12</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading projects...</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading()" class="dashboard-sections">
+    <!-- New Projects Section -->
+    <section class="project-section">
+      <div class="section-header">
+        <h3>New Projects <span class="count">{{ pendingProjects().length }}</span></h3>
+      </div>
+
+      <div *ngIf="pendingProjects().length === 0" class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <p>No projects pending approval.</p>
+      </div>
+
+      <div class="projects-grid">
+        <app-project-card *ngFor="let project of pendingProjects()" [project]="project"
+          (viewDetails)="onViewProject($event)">
+        </app-project-card>
+      </div>
+    </section>
+
+    <!-- Draft Projects Section -->
+    <section class="project-section">
+      <div class="section-header">
+        <h3>Draft Projects <span class="count">{{ draftProjects().length }}</span></h3>
+      </div>
+
+      <div *ngIf="draftProjects().length === 0" class="empty-state">
+        <i class="fas fa-edit"></i>
+        <p>No draft projects at the moment.</p>
+      </div>
+
+      <div class="projects-grid">
+        <app-project-card *ngFor="let project of draftProjects()" [project]="project"
+          (viewDetails)="onViewProject($event)">
+        </app-project-card>
+      </div>
+    </section>
+  </div>
+
+  <!-- Project Details Modal -->
+  <app-project-details *ngIf="selectedProject()" [project]="selectedProject()!" (close)="onCloseDetails()"
+    (approve)="onApproveProject($event)" (reject)="onRejectProject($event)">
+  </app-project-details>
+</div>

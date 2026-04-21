@@ -1,0 +1,49 @@
+<div class="details-overlay" (click)="onClose()">
+  <div class="details-card" (click)="$event.stopPropagation()">
+    <div class="details-header">
+      <div class="title-section">
+        <div class="badge" [ngClass]="project.status.toLowerCase()">{{ project.status }}</div>
+        <h2>{{ project.title }}</h2>
+      </div>
+      <button class="close-btn" (click)="onClose()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="details-content">
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span class="label">Date Submitted</span>
+          <span class="value">{{ project.createdAt | date:'longDate' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">Creator</span>
+          <span class="value">{{ project.creatorName }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">Project ID</span>
+          <span class="value">#{{ project.id }}</span>
+        </div>
+      </div>
+
+      <div class="description-section">
+        <h3>Project Description</h3>
+        <p>{{ project.description }}</p>
+      </div>
+
+      <!-- Add more sections if needed -->
+    </div>
+
+    <div class="details-footer">
+      <button class="btn btn-secondary" (click)="onClose()">Cancel</button>
+      <div class="action-btns">
+        <button class="btn btn-danger" (click)="onReject()">
+          <i class="fas fa-times-circle"></i> Reject
+        </button>
+        <button class="btn btn-primary" (click)="onApprove()">
+          <i class="fas fa-check-circle"></i> Approve
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

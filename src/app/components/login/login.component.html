@@ -1,0 +1,69 @@
+<div class="login-container">
+  <div class="theme-toggle">
+    <button (click)="toggleTheme()" [class.active]="isDarkMode" aria-label="Toggle Theme">
+      <div class="toggle-track">
+        <div class="toggle-thumb">
+          <i *ngIf="!isDarkMode" class="fas fa-sun"></i>
+          <i *ngIf="isDarkMode" class="fas fa-moon"></i>
+        </div>
+      </div>
+    </button>
+  </div>
+
+  <div class="login-card">
+    <div class="card-header">
+      <div class="logo">
+        <img src="assets/logo-1.webp" alt="">
+      </div>
+      <h1>Welcome back</h1>
+      <p>Log in to your Rafeeq account</p>
+    </div>
+
+    <div *ngIf="errorMessage()" class="alert error">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ errorMessage() }}
+    </div>
+
+    <form (ngSubmit)="onLogin()" #loginForm="ngForm" class="login-form">
+      <div class="input-group">
+        <label for="email">Email Address</label>
+        <div class="input-wrapper">
+          <i class="fas fa-envelope input-icon"></i>
+          <input type="email" id="email" name="email" [(ngModel)]="email" placeholder="Enter your email" required
+            #emailInput="ngModel">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock input-icon"></i>
+          <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" [(ngModel)]="password"
+            placeholder="Enter your password" required>
+          <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+            <i class="fas" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-options">
+
+        <a routerLink="/forgot-password" class="forgot-password">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="!loginForm.form.valid || isLoading()">
+        <span *ngIf="!isLoading()">Sign in</span>
+        <span *ngIf="isLoading()" class="spinner"></span>
+        <i *ngIf="!isLoading()" class="fas fa-arrow-right"></i>
+      </button>
+
+      <div class="signup-prompt">
+        Don't have an account? <a routerLink="/signup">Sign up for free</a>
+      </div>
+    </form>
+  </div>
+
+  <footer class="login-footer">
+    <p>&copy; 2026 Rafeeq Admin. All rights reserved.</p>
+  </footer>
+</div>
