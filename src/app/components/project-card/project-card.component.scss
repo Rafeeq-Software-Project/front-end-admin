@@ -3,12 +3,12 @@
 }
 
 .project-card {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 1.25rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-normal);
+  border: 1px solid var(--border-color);
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -24,15 +24,15 @@
     left: 0;
     width: 4px;
     height: 100%;
-    background: #6366f1;
+    background: var(--primary-color);
     transform: scaleY(0);
     transition: transform 0.3s ease;
   }
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
-    border-color: #6366f1;
+    box-shadow: var(--shadow-md), var(--shadow-glow);
+    border-color: var(--primary-color);
 
     &::before {
       transform: scaleY(1);
@@ -48,34 +48,11 @@
     border-style: dashed;
 
     &::before {
-      background: #8b5cf6;
+      background: var(--secondary-color);
     }
-  }
-}
-
-:host-context(.dark) {
-  .project-card {
-    background: #1e293b;
-    border-color: #334155;
-
+    
     &:hover {
-      border-color: #6366f1;
-    }
-
-    .title {
-      color: #f8fafc;
-    }
-
-    .description {
-      color: #94a3b8;
-    }
-
-    .founder {
-      color: #cbd5e1;
-    }
-
-    .card-footer {
-      border-top-color: #334155;
+      border-color: var(--secondary-color);
     }
   }
 }
@@ -92,7 +69,7 @@
 
   .date {
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--text-muted);
     font-weight: 500;
   }
 }
@@ -116,15 +93,15 @@
   }
 
   &.draft-indicator {
-    background: rgba(139, 92, 246, 0.1);
-    color: #8b5cf6;
+    background: rgba(168, 85, 247, 0.1);
+    color: var(--secondary-color);
   }
 }
 
 .title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -135,7 +112,7 @@
 
 .description {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
   flex-grow: 1;
@@ -147,7 +124,7 @@
   justify-content: space-between;
   align-items: flex-end;
   padding-top: 1.25rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-color);
 
   .founder {
     display: flex;
@@ -160,12 +137,12 @@
       gap: 0.5rem;
       font-size: 0.875rem;
       font-weight: 600;
-      color: #334155;
+      color: var(--text-primary);
     }
 
     .company {
       font-size: 0.75rem;
-      color: #94a3b8;
+      color: var(--text-muted);
     }
   }
 
@@ -177,14 +154,14 @@
     .label {
       font-size: 0.65rem;
       text-transform: uppercase;
-      color: #94a3b8;
+      color: var(--text-muted);
       font-weight: 700;
     }
 
     .value {
       font-size: 1rem;
       font-weight: 700;
-      color: #6366f1;
+      color: var(--primary-color);
     }
   }
 }
@@ -193,7 +170,7 @@
   position: absolute;
   bottom: 1.5rem;
   right: 1.5rem;
-  background: #6366f1;
+  background: var(--primary-color);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
@@ -204,10 +181,11 @@
   font-weight: 600;
   opacity: 0;
   transform: translateX(10px);
-  transition: all 0.3s ease;
+  transition: var(--transition-normal);
   pointer-events: none;
+  box-shadow: var(--shadow-md);
 }
 
-:host-context(.dark) .card-action {
-  background: #8b5cf6;
+.draft-card .card-action {
+  background: var(--secondary-color);
 }

@@ -51,19 +51,25 @@ export class ProjectService {
   }
 
   approveProject(id: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/projects/${id}/approve`, {});
+    return this.http.put(`${this.apiUrl}/projects/${id}/review`, { status: 2 });
   }
 
-  rejectProject(id: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/projects/${id}/reject`, {});
+  rejectProject(id: number, reason: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/projects/${id}/review`, {
+      status: 3,
+      rejectionReason: reason
+    });
   }
 
   approveDraft(id: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/drafts/${id}/approve`, {});
+    return this.http.put(`${this.apiUrl}/drafts/${id}/review`, { status: 2 });
   }
 
-  rejectDraft(id: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/drafts/${id}/reject`, {});
+  rejectDraft(id: number, reason: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/drafts/${id}/review`, {
+      status: 3,
+      rejectionReason: reason
+    });
   }
 }
 

@@ -5,6 +5,12 @@ import { DashboardService, DashboardView } from '../../services/dashboard.servic
 import { ProjectCardComponent } from '../project-card/project-card.component';
 import { ProjectDetailsComponent } from '../project-details/project-details.component';
 import { catchError, of } from 'rxjs';
+import Swal from 'sweetalert2';
+
+
+
+// or via CommonJS
+
 
 @Component({
   selector: 'app-dashboard-home',
@@ -85,40 +91,74 @@ export class DashboardHomeComponent implements OnInit {
   onApproveProject(id: number) {
     this.projectService.approveProject(id).subscribe({
       next: () => {
+        Swal.fire({
+          title: "Project accepted successfully!",
+          icon: "success",
+          draggable: true
+        });
         this.loadPendingProjects();
         this.onCloseDetails();
       },
-      error: () => this.onCloseDetails() // In a real app, show error toast
+      error: (err) => {
+        alert('Failed to accept project. Please try again.');
+        console.error(err);
+      }
     });
   }
 
   onRejectProject(id: number) {
-    this.projectService.rejectProject(id).subscribe({
+    const reason = "Insufficient market research. Please provide detailed competitor analysis and target market size data before resubmitting.";
+    this.projectService.rejectProject(id, reason).subscribe({
       next: () => {
+        Swal.fire({
+          title: "Project rejected successfully!",
+          icon: "success",
+          draggable: true
+        });
         this.loadPendingProjects();
         this.onCloseDetails();
       },
-      error: () => this.onCloseDetails()
+      error: (err) => {
+        alert('Failed to reject project. Please try again.');
+        console.error(err);
+      }
     });
   }
 
   onApproveDraft(id: number) {
     this.projectService.approveDraft(id).subscribe({
       next: () => {
+        Swal.fire({
+          title: "Draft accepted successfully!",
+          icon: "success",
+          draggable: true
+        });
         this.loadDraftProjects();
         this.onCloseDetails();
       },
-      error: () => this.onCloseDetails()
+      error: (err) => {
+        alert('Failed to accept draft. Please try again.');
+        console.error(err);
+      }
     });
   }
 
   onRejectDraft(id: number) {
-    this.projectService.rejectDraft(id).subscribe({
+    const reason = "The proposed funding goal increase is not justified by the current financial projections. Please provide a detailed budget breakdown before resubmitting.";
+    this.projectService.rejectDraft(id, reason).subscribe({
       next: () => {
+        Swal.fire({
+          title: "Draft rejected successfully!",
+          icon: "success",
+          draggable: true
+        });
         this.loadDraftProjects();
         this.onCloseDetails();
       },
-      error: () => this.onCloseDetails()
+      error: (err) => {
+        alert('Failed to reject draft. Please try again.');
+        console.error(err);
+      }
     });
   }
 
