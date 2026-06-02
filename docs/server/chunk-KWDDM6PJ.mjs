@@ -1,0 +1,2 @@
+import './polyfills.server.mjs';
+import{Fa as i,K as r}from"./chunk-KXUHPJX3.mjs";var s=(()=>{class t{constructor(){this.currentView=i("overview")}setView(e){this.currentView.set(e)}static{this.\u0275fac=function(n){return new(n||t)}}static{this.\u0275prov=r({token:t,factory:t.\u0275fac,providedIn:"root"})}}return t})();var u={production:!0,apiUrl:"http://rafeeq-api.runasp.net"};export{u as a,s as b};
